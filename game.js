@@ -10,53 +10,85 @@ function createSpaceship() {
         xpos: 0,
         ypos: 0,
 
-        speed: 0,
         xspeed: 0,
         yspeed: 0,
-
-        acceleration: 1,
 
         rotation: 0,
         rotationspeed: 0,
 
         // methods
-        move: function() {
-            // use of (1 / exponential) to decrease acceleration as speed increases (CHANGE TO USE DRAG EQUATION, THRUST FORCE & F=MA)
-            this.acceleration = 1 / (1.5 ** Math.abs(this.speed))
+        calcSpeed: function() {
+            const dragCoefficient = 0.99
+            const acceleration = 0.25
 
-            // applies acceleration to speed & rotation
-            if (keys.up) {
-                this.speed += this.acceleration
+            if (keys.up) { // when up key being held
+                // applies acceleration in direction spaceship is facing (deg -> rad in trig functions)
+                this.xspeed += acceleration * Math.cos(this.rotation * ((2 * Math.PI) / 360)) * multiplier
+                this.yspeed += acceleration * Math.sin(this.rotation * ((2 * Math.PI) / 360)) * multiplier
             }
-            if (keys.down) {
-                this.speed -= this.acceleration
+            
+            // drag applied
+            this.xspeed *= dragCoefficient ** multiplier
+            this.yspeed *= dragCoefficient ** multiplier
+
+            // stops silly little speeds
+            if (Math.abs(this.xspeed) < 0.1) {
+                this.xspeed = 0
             }
+            if (Math.abs(this.yspeed) < 0.1) {
+                this.yspeed = 0
+            }
+        },
+
+        calcRotation: function(multiplier) {
+            const dragCoefficient = 0.96
+            const acceleration = 0.3
+
             if (keys.left) {
-                this.rotationspeed -= 0.2
+                this.rotationspeed -= acceleration * multiplier // rotation anti-clockwise
             }
             if (keys.right) {
-                this.rotationspeed += 0.2
+                this.rotationspeed += acceleration * multiplier // rotation clockwise
+            }
+            
+            this.rotationspeed *= dragCoefficient ** multiplier // drag applied
+
+            // stops tiny rotations
+            if (Math.abs(this.rotationspeed) < 0.1) {
+                this.rotationspeed = 0
             }
 
-            // current inplementation of drag (to change)
-            this.speed *= 0.99
-            this.rotationspeed *= 0.99
-
-            // stops silly little accelerations
-            if (Math.abs(this.speed) < 0.1) {
-                this.speed = 0
-            }
-
-            // applies speed to position & rotation attributes
-            this.ypos += this.speed * Math.sin(this.rotation * ((2*Math.PI)/360))
-            this.xpos += this.speed * Math.cos(this.rotation * ((2*Math.PI)/360))
-            this.rotation += this.rotationspeed
             // restricts rotation to between 0 & 360
             if (this.rotation >= 360) {
                 this.rotation = 0
             }
-            else if (this.rotation <= 0) {
+            else if (this.rotation < 0) {
                 this.rotation = 360
+            }
+        },
+
+        move: function(multiplier) {
+            // calls functions to calculate the speed of movement + rotation for that frame
+            this.calcSpeed(multiplier)
+            this.calcRotation(multiplier)
+
+            // applies these speeds to positions + rotation
+            this.ypos += this.yspeed
+            this.xpos += this.xspeed
+            this.rotation += this.rotationspeed
+
+            // if spaceship off screen, reappears at opposite side of screen
+            if (this.ypos > 640) {
+                this.ypos = -80
+            }
+            else if (this.ypos < -80) {
+                this.ypos = 640
+            }
+            if (this.xpos > screen.width - 20) {
+                this.xpos = -80
+            }
+            else if (this.xpos < -80) {
+                this.xpos = screen.width - 20
             }
         },
 
@@ -67,9 +99,9 @@ function createSpaceship() {
             this.reference.style.rotate = this.rotation + "deg"
         },
 
-        update: function() {
+        update: function(multiplier) {
             // all methods that should be called every frame
-            this.move()
+            this.move(multiplier)
             this.draw()
         }
 
@@ -111,7 +143,11 @@ function keyUnPressed(key) {
 
 // Main Game Loop
 function gameLoop(timeStamp) {
-    spaceship.update()
+    deltatime = timeStamp - lastTimeStamp
+    lastTimeStamp = timeStamp
+    multiplier = deltatime * 0.06
+    console.log(multiplier)
+    spaceship.update(multiplier)
     requestAnimationFrame(gameLoop)
 }
 
@@ -124,6 +160,7 @@ var keys = {
     left: false,
     right: false
 }
+var lastTimeStamp = 0
 document.body.addEventListener("keydown", (ev) => keyPressed(ev.key));
 document.body.addEventListener("keyup", (ev) => keyUnPressed(ev.key));
 requestAnimationFrame(gameLoop)

@@ -1,6 +1,20 @@
-#spaceship{
+body{
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+}
+
+#spaceship {
     height: 80px;
     width: 80px;
     position: absolute;
-    rotate: 90deg;
 }
+
+#gamebox {
+    position: absolute;
+    margin: auto;
+    height: calc(100vh - 40px);
+    width: calc(100vw - 40px);
+    border: 20px solid black;
+}
+
