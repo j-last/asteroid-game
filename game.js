@@ -1,14 +1,16 @@
 // imports
-
-
+    
 // Spaceship Construnction Function
 function createSpaceship() {
     return {
         // attributes
         reference: document.getElementById("spaceship"),
 
-        xpos: 0,
-        ypos: 0,
+        xpos: 50,
+        ypos: 200,
+        getPos: function() {
+            return [this.xpos, this.ypos]
+        },
 
         xspeed: 0,
         yspeed: 0,
@@ -18,8 +20,8 @@ function createSpaceship() {
 
         // methods
         calcSpeed: function() {
-            const dragCoefficient = 0.99
-            const acceleration = 0.25
+            const dragCoefficient = 0.98
+            const acceleration = 0.2
 
             if (keys.up) { // when up key being held
                 // applies acceleration in direction spaceship is facing (deg -> rad in trig functions)
@@ -42,7 +44,7 @@ function createSpaceship() {
 
         calcRotation: function(multiplier) {
             const dragCoefficient = 0.96
-            const acceleration = 0.3
+            const acceleration = 0.2
 
             if (keys.left) {
                 this.rotationspeed -= acceleration * multiplier // rotation anti-clockwise
@@ -108,6 +110,41 @@ function createSpaceship() {
     };
 };
 
+// Gate Construnction Function
+function createGate(num, xpos, ypos) {
+    let newgate = document.createElement("div")
+    newgate.className = "gate"
+    newgate.id = "gate" + num
+    parentElement = document.getElementById("maingamebox")
+    parentElement.appendChild(newgate)
+    return {
+        reference: newgate,
+        xpos,
+        ypos,
+
+        passedThrough: function(pos) {
+            if (this.xpos - 5 < pos[0]) {
+                if (pos[0] < this.xpos + 5) {
+                    if (this.ypos < pos[1]) {
+                        if (pos[1] < this.ypos + 125) {
+                            this.reference.style.background = "blue"
+                        }
+                    }
+                }
+            }
+        },
+
+        draw: function() {
+            this.reference.style.top = this.ypos + "px"
+            this.reference.style.left = this.xpos + "px"
+        },
+
+        update: function(pos) {
+            this.passedThrough(pos)
+            this.draw()
+        }
+    }
+}
 
 // Misc Functions
 function keyPressed(key) {
@@ -146,21 +183,36 @@ function gameLoop(timeStamp) {
     deltatime = timeStamp - lastTimeStamp
     lastTimeStamp = timeStamp
     multiplier = deltatime * 0.06
-    console.log(multiplier)
     spaceship.update(multiplier)
+    for (i = 0; i < level.length; i++) {
+        level[i].update(spaceship.getPos())
+    }
     requestAnimationFrame(gameLoop)
 }
 
 
 // Initialise identifiers & call game loop
 const spaceship = createSpaceship()
+
+const levels = [
+    [[300, 300], [600, 300]],
+    [[400, 400], [700, 400]]
+]
+var level = levels[0]
+for (var i = 0; i < level.length; i ++) {
+    level[i] = createGate(i, level[i][0], level[i][1])
+}
+
 var keys = {
     up: false,
     down: false,
     left: false,
     right: false
 }
+
 var lastTimeStamp = 0
+
 document.body.addEventListener("keydown", (ev) => keyPressed(ev.key));
 document.body.addEventListener("keyup", (ev) => keyUnPressed(ev.key));
+
 requestAnimationFrame(gameLoop)

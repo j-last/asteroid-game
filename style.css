@@ -5,12 +5,19 @@ body{
 }
 
 #spaceship {
-    height: 80px;
-    width: 80px;
     position: absolute;
+    height: 60px;
+    width: 60px;
 }
 
-#gamebox {
+.gate {
+    position: absolute;
+    height: 125px;
+    width: 10px;
+    background: yellow;
+}
+
+.gamebox {
     position: absolute;
     margin: auto;
     height: calc(100vh - 40px);
