@@ -10,10 +10,17 @@ body{
     width: 60px;
 }
 
-.gate {
+.verticalgate {
     position: absolute;
     height: 125px;
     width: 10px;
+    background: yellow;
+}
+
+.horizontalgate {
+    position: absolute;
+    height: 10px;
+    width: 125px;
     background: yellow;
 }
 

@@ -1,5 +1,5 @@
 // imports
-    
+
 // Spaceship Construnction Function
 function createSpaceship() {
     return {
@@ -9,7 +9,7 @@ function createSpaceship() {
         xpos: 50,
         ypos: 200,
         getPos: function() {
-            return [this.xpos, this.ypos]
+            return [this.xpos + 30, this.ypos + 30] // +30 for coords of middle
         },
 
         xspeed: 0,
@@ -111,9 +111,9 @@ function createSpaceship() {
 };
 
 // Gate Construnction Function
-function createGate(num, xpos, ypos) {
+function createGate(num, xpos, ypos, orientation) {
     let newgate = document.createElement("div")
-    newgate.className = "gate"
+    newgate.className = orientation + "gate"
     newgate.id = "gate" + num
     parentElement = document.getElementById("maingamebox")
     parentElement.appendChild(newgate)
@@ -123,6 +123,9 @@ function createGate(num, xpos, ypos) {
         ypos,
 
         passedThrough: function(pos) {
+            //width = this.reference.style.width
+            //height = this.reference.style.height
+            //console.log(this.reference.style.background)
             if (this.xpos - 5 < pos[0]) {
                 if (pos[0] < this.xpos + 5) {
                     if (this.ypos < pos[1]) {
@@ -142,6 +145,7 @@ function createGate(num, xpos, ypos) {
         update: function(pos) {
             this.passedThrough(pos)
             this.draw()
+            return this.reference.style.background === "blue"
         }
     }
 }
@@ -184,24 +188,45 @@ function gameLoop(timeStamp) {
     lastTimeStamp = timeStamp
     multiplier = deltatime * 0.06
     spaceship.update(multiplier)
+
+    gatesDone = 0
     for (i = 0; i < level.length; i++) {
-        level[i].update(spaceship.getPos())
+        doneGate = level[i].update(spaceship.getPos())
+        if (doneGate) {
+            gatesDone += 1
+        }
+    }
+    if (gatesDone === level.length) {
+        parentElement = document.getElementById("maingamebox")
+        for (i = 0; i < level.length; i++) {
+            parentElement.removeChild(document.getElementById("gate" + i))
+        };
+        
+        level = getNextLevel()
     }
     requestAnimationFrame(gameLoop)
 }
 
+const levels = [
+    [[300, 200, "vertical"], [600, 200, "vertical"], [1000, 100, "vertical"]],
+    [[400, 400, "vertical"], [700, 400, "vertical"], [900, 200, "horizontal"]]
+]
+var levelNum = 0
+function getNextLevel() {
+    level = levels[levelNum]
+    levelNum += 1
+    for (var i = 0; i < level.length; i ++) {
+        level[i] = createGate(i, level[i][0], level[i][1], level[i][2])
+    }
+    return level
+}
 
 // Initialise identifiers & call game loop
 const spaceship = createSpaceship()
 
-const levels = [
-    [[300, 300], [600, 300]],
-    [[400, 400], [700, 400]]
-]
-var level = levels[0]
-for (var i = 0; i < level.length; i ++) {
-    level[i] = createGate(i, level[i][0], level[i][1])
-}
+var level = getNextLevel()
+
+
 
 var keys = {
     up: false,
@@ -216,3 +241,4 @@ document.body.addEventListener("keydown", (ev) => keyPressed(ev.key));
 document.body.addEventListener("keyup", (ev) => keyUnPressed(ev.key));
 
 requestAnimationFrame(gameLoop)
+
