@@ -12,16 +12,14 @@ body{
 
 .verticalgate {
     position: absolute;
-    height: 125px;
-    width: 10px;
-    background: yellow;
+    height: 150px;
+    width: 15px;
 }
 
 .horizontalgate {
     position: absolute;
-    height: 10px;
-    width: 125px;
-    background: yellow;
+    height: 15px;
+    width: 150px;
 }
 
 .gamebox {

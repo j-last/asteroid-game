@@ -9,7 +9,7 @@ function createSpaceship() {
         xpos: 50,
         ypos: 200,
         getPos: function() {
-            return [this.xpos + 30, this.ypos + 30] // +30 for coords of middle
+            return [this.xpos + 30, this.ypos + 30] // +30 for coords of middle & centre
         },
 
         xspeed: 0,
@@ -34,10 +34,10 @@ function createSpaceship() {
             this.yspeed *= dragCoefficient ** multiplier
 
             // stops silly little speeds
-            if (Math.abs(this.xspeed) < 0.1) {
+            if (Math.abs(this.xspeed) < 0.05) {
                 this.xspeed = 0
             }
-            if (Math.abs(this.yspeed) < 0.1) {
+            if (Math.abs(this.yspeed) < 0.05) {
                 this.yspeed = 0
             }
         },
@@ -56,7 +56,7 @@ function createSpaceship() {
             this.rotationspeed *= dragCoefficient ** multiplier // drag applied
 
             // stops tiny rotations
-            if (Math.abs(this.rotationspeed) < 0.1) {
+            if (Math.abs(this.rotationspeed) < 0.05) {
                 this.rotationspeed = 0
             }
 
@@ -80,17 +80,20 @@ function createSpaceship() {
             this.rotation += this.rotationspeed
 
             // if spaceship off screen, reappears at opposite side of screen
-            if (this.ypos > 640) {
-                this.ypos = -80
+            gamebox = window.getComputedStyle(document.getElementById("maingamebox"))
+            height = parseInt(gamebox.getPropertyValue("height"))
+            width = parseInt(gamebox.getPropertyValue("width"))
+            if (this.ypos > height) {
+                this.ypos = -60
             }
-            else if (this.ypos < -80) {
-                this.ypos = 640
+            else if (this.ypos < -60) {
+                this.ypos = height
             }
-            if (this.xpos > screen.width - 20) {
-                this.xpos = -80
+            if (this.xpos > width) {
+                this.xpos = -60
             }
-            else if (this.xpos < -80) {
-                this.xpos = screen.width - 20
+            else if (this.xpos < -60) {
+                this.xpos = width
             }
         },
 
@@ -112,27 +115,29 @@ function createSpaceship() {
 
 // Gate Construnction Function
 function createGate(num, xpos, ypos, orientation) {
-    let newgate = document.createElement("div")
+    let newgate = document.createElement("img")
+    newgate.src = orientation + " yellow ring.png"
     newgate.className = orientation + "gate"
     newgate.id = "gate" + num
     parentElement = document.getElementById("maingamebox")
     parentElement.appendChild(newgate)
+
     return {
         reference: newgate,
         xpos,
         ypos,
+        height: parseInt(window.getComputedStyle(newgate).getPropertyValue("height")),
+        width: parseInt(window.getComputedStyle(newgate).getPropertyValue("width")),
+        goneThrough: false,
 
         passedThrough: function(pos) {
-            //width = this.reference.style.width
-            //height = this.reference.style.height
-            //console.log(this.reference.style.background)
-            if (this.xpos - 5 < pos[0]) {
-                if (pos[0] < this.xpos + 5) {
-                    if (this.ypos < pos[1]) {
-                        if (pos[1] < this.ypos + 125) {
-                            this.reference.style.background = "blue"
-                        }
-                    }
+            x = pos[0]
+            y = pos[1]
+            
+            if (this.xpos < x && x < this.xpos + this.width) {
+                if (this.ypos < y && y < this.ypos + this.height) {
+                    this.reference.src = orientation + " blue ring.png"
+                    this.goneThrough = true
                 }
             }
         },
@@ -145,7 +150,7 @@ function createGate(num, xpos, ypos, orientation) {
         update: function(pos) {
             this.passedThrough(pos)
             this.draw()
-            return this.reference.style.background === "blue"
+            return this.goneThrough
         }
     }
 }
@@ -209,7 +214,8 @@ function gameLoop(timeStamp) {
 
 const levels = [
     [[300, 200, "vertical"], [600, 200, "vertical"], [1000, 100, "vertical"]],
-    [[400, 400, "vertical"], [700, 400, "vertical"], [900, 200, "horizontal"]]
+    [[400, 500, "vertical"], [700, 500, "vertical"], [900, 400, "horizontal"], 
+    [400, 100, "vertical"], [700, 100, "vertical"]],
 ]
 var levelNum = 0
 function getNextLevel() {
