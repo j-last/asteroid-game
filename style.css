@@ -2,31 +2,35 @@ body{
     padding: 0px;
     margin: 0px;
     overflow: hidden;
+    z-index: 1;
 }
 
 #spaceship {
     position: absolute;
     height: 60px;
     width: 60px;
+    z-index: 2;
 }
 
-.verticalgate {
+.vgate {
     position: absolute;
     height: 150px;
     width: 15px;
+    z-index: 3;
 }
 
-.horizontalgate {
+.hgate {
     position: absolute;
     height: 15px;
     width: 150px;
+    z-index: 4;
 }
 
 .gamebox {
     position: absolute;
-    margin: auto;
     height: calc(100vh - 40px);
     width: calc(100vw - 40px);
     border: 20px solid black;
+    z-index: 5;
 }
 
