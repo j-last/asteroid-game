@@ -1,13 +1,22 @@
 // imports
 
 // Spaceship Construnction Function
-function createSpaceship() {
+function createSpaceship(ypos, xpos) {
+    reference = document.getElementById("spaceship")
+    reference.style.top = ypos
+    newypos = parseInt(window.getComputedStyle(reference).getPropertyValue("top")) - parseInt(window.getComputedStyle(reference).getPropertyValue("height")) / 2
+    reference.style.top = newypos + "px"
+    
+    reference.style.left = xpos
+    newxpos = parseInt(window.getComputedStyle(reference).getPropertyValue("left")) - parseInt(window.getComputedStyle(reference).getPropertyValue("width")) / 2
+    reference.style.left = newxpos + "px"
+
     return {
         // attributes
         reference: document.getElementById("spaceship"),
 
-        xpos: 50,
-        ypos: 200,
+        xpos: parseInt(window.getComputedStyle(reference).getPropertyValue("left")),
+        ypos: parseInt(window.getComputedStyle(reference).getPropertyValue("top")),
         getPos: function() {
             return [this.xpos + 30, this.ypos + 30] // +30 for coords of middle & centre
         },
@@ -21,7 +30,7 @@ function createSpaceship() {
         // methods
         calcSpeed: function() {
             const dragCoefficient = 0.98
-            const acceleration = 0.2
+            const acceleration = 0.15
 
             if (keys.up) { // when up key being held
                 // applies acceleration in direction spaceship is facing (deg -> rad in trig functions)
@@ -43,8 +52,8 @@ function createSpaceship() {
         },
 
         calcRotation: function(multiplier) {
-            const dragCoefficient = 0.96
-            const acceleration = 0.2
+            const dragCoefficient = 0.97
+            const acceleration = 0.15
 
             if (keys.left) {
                 this.rotationspeed -= acceleration * multiplier // rotation anti-clockwise
@@ -116,14 +125,19 @@ function createSpaceship() {
 // Gate Construnction Function
 function createGate(num, xpos, ypos, orientation) {
     let newgate = document.createElement("img")
-    newgate.src = orientation + " yellow ring.png"
+    newgate.src = orientation + " red ring.png"
     newgate.className = orientation + "gate"
     newgate.id = "gate" + num
     parentElement = document.getElementById("maingamebox")
     parentElement.appendChild(newgate)
 
-    newgate.style.top = ypos
+    newgate.style.top = ypos 
+    newypos = parseInt(window.getComputedStyle(newgate).getPropertyValue("top")) - parseInt(window.getComputedStyle(newgate).getPropertyValue("height")) / 2
+    newgate.style.top = newypos + "px"
+
     newgate.style.left = xpos
+    newxpos = parseInt(window.getComputedStyle(newgate).getPropertyValue("left")) - parseInt(window.getComputedStyle(newgate).getPropertyValue("width")) / 2
+    newgate.style.left = newxpos + "px"
 
     return {
         reference: newgate,
@@ -139,14 +153,13 @@ function createGate(num, xpos, ypos, orientation) {
             
             if (this.xpos < x && x < this.xpos + this.width) {
                 if (this.ypos < y && y < this.ypos + this.height) {
-                    this.reference.src = orientation + " blue ring.png"
                     this.goneThrough = true
                 }
             }
         },
 
-        draw: function() {
-            this.reference.src = orientation + " blue ring.png"
+        makeYellow: function() {
+            this.reference.src = orientation + " yellow ring.png"
         },
 
         getID: function() {
@@ -154,9 +167,8 @@ function createGate(num, xpos, ypos, orientation) {
         },
 
         update: function(pos) {
-            console.log("hello")
             this.passedThrough(pos)
-            this.draw()
+            this.reference.src = orientation + " blue ring.png"
             return this.goneThrough
         }
     }
@@ -202,8 +214,15 @@ function gameLoop(timeStamp) {
     spaceship.update(multiplier)
 
     if (gates[0].update(spaceship.getPos())) {
-        console.log("gate" + gates[0][0])
         document.getElementById("maingamebox").removeChild(document.getElementById(gates[0].getID()))
+        newgatenum = gates[2][0] + 1
+        newgate_x = String(Math.floor(Math.random() * 90) + 5) +"%"
+        newgate_y = String(Math.floor(Math.random() * 90) + 5) +"%"
+        orientationnum = Math.random()
+        if (orientationnum < 0.5) {newgateorientation = "v"}
+        else {newgateorientation = "h"}
+        gates[2].makeYellow()
+        gates = [gates[1], gates[2], createGate(newgatenum, newgate_x, newgate_y, newgateorientation)]
     };
     requestAnimationFrame(gameLoop)
 }
@@ -219,8 +238,9 @@ var keys = {
 document.body.addEventListener("keydown", (ev) => keyPressed(ev.key));
 document.body.addEventListener("keyup", (ev) => keyUnPressed(ev.key));
 
-var spaceship = createSpaceship()
-var gates = [createGate(1, "25%", "35%", "v"), createGate(2, "50%", "35%", "v"), createGate(3, "75%", "35%", "v")]
+var spaceship = createSpaceship("50%", "10%")
+var gates = [createGate(1, "25%", "50%", "v"), createGate(2, "50%", "50%", "v"), createGate(3, "75%", "50%", "v")]
+gates[1].makeYellow()
 var lastTimeStamp = 0
 
 requestAnimationFrame(gameLoop)
